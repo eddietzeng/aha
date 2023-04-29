@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<robot generator="Robot 6.0.2 (Python 3.6.9 on linux)" generated="20230426 13:34:58.299" rpa="false" schemaversion="3">
+<suite id="s1" name="Case1 Signin" source="/workspace/cases/case1_signin.robot">
+<test id="s1-t1" name="Test Google OAuth Sign In" line="9">
+<kw name="Open Uc Chrome To Web Page" library="common">
+<kw name="Open Uc Chrome To Page" library="helper">
+<var>${web_driver}</var>
+<arg>${test_page}</arg>
+<msg timestamp="20230426 13:34:58.607" level="INFO">Selenium patched. Safe to import Chrome / ChromeOptions</msg>
+<msg timestamp="20230426 13:34:58.676" level="INFO">Selenium patched. Safe to import Chrome / ChromeOptions</msg>
+<msg timestamp="20230426 13:34:58.690" level="FAIL">OSError: [Errno 8] Exec format error: './chromedriver'</msg>
+<status status="FAIL" starttime="20230426 13:34:58.546" endtime="20230426 13:34:58.693"/>
+</kw>
+<kw name="Set Global Variable" library="BuiltIn">
+<arg>${web_driver}</arg>
+<doc>Makes a variable available globally in all tests and suites.</doc>
+<status status="NOT RUN" starttime="20230426 13:34:58.693" endtime="20230426 13:34:58.693"/>
+</kw>
+<status status="FAIL" starttime="20230426 13:34:58.545" endtime="20230426 13:34:58.694"/>
+</kw>
+<kw name="Sign In To Existing Account With Google OAuth" library="common">
+<status status="NOT RUN" starttime="20230426 13:34:58.694" endtime="20230426 13:34:58.694"/>
+</kw>
+<kw name="Validate Sign In" library="common">
+<status status="NOT RUN" starttime="20230426 13:34:58.694" endtime="20230426 13:34:58.695"/>
+</kw>
+<status status="FAIL" starttime="20230426 13:34:58.544" endtime="20230426 13:34:58.695">OSError: [Errno 8] Exec format error: './chromedriver'</status>
+</test>
+<doc>SingIn Tests</doc>
+<status status="FAIL" starttime="20230426 13:34:58.301" endtime="20230426 13:34:58.698"/>
+</suite>
+<statistics>
+<total>
+<stat pass="0" fail="1" skip="0">All Tests</stat>
+</total>
+<tag>
+</tag>
+<suite>
+<stat pass="0" fail="1" skip="0" id="s1" name="Case1 Signin">Case1 Signin</stat>
+</suite>
+</statistics>
+<errors>
+</errors>
+</robot>
