@@ -7,7 +7,10 @@ Resource        ../res/common.robot
 
 *** Test Cases ***
 Test Google OAuth Sign In
-    Open Uc Chrome To Web Page
+    Open Firfox To Web Page
     Sign In To Existing Account With Google OAuth
     Validate Sign In
 
+Test Sign Out
+    Sign Out Web Page
+    Validate Sign Out

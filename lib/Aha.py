@@ -1,0 +1,203 @@
+import time
+import re
+
+from pathlib import Path
+from playwright.sync_api import sync_playwright
+from datetime import date
+
+# from pages.login.locators import LoginLocator
+# from pages.profile.locators import ProfileLocator
+
+
+class Aha():
+    ROBOT_LIBRARY_SCOPE = "GLOBAL"
+
+    def __init__(self):
+        self.browser = None
+        self.page = None
+
+    def open_firefox_to_page(self, test_page):
+        try:
+            p = sync_playwright().start()
+            self.browser = p.firefox.launch(headless=True)
+            self.page = self.browser.new_page()
+            self.page.goto(test_page)
+            self.page.wait_for_load_state("domcontentloaded")
+        except Exception as err:
+            print(f"Failed to create browser: {err}")
+            self.close()
+
+    def close(self):
+        if self.page:
+            self.page.close()
+        if self.browser:
+            self.browser.close()
+
+    def sign_in_with_google_oauth(self, user, password):
+        login_result = False
+        try:
+            # login to google oauth
+            self.page.click("text=Log In")
+            self.page.click("text=Continue with Google")
+            self.page.locator("input[name='identifier']").fill("eddiefree27@gmail.com")
+            self.page.click("#identifierNext")
+            # self.page.locator("//span[text()='Next' or text()='繼續' or text()='下一步']").click()
+            time.sleep(2)
+            if not self.page.locator("input[name='password'], input[name='Passwd']").is_visible():
+                self.page.keyboard.press("Escape")
+                self.page.click("#identifierNext")
+
+            self.page.locator("input[name='password'], input[name='Passwd']").fill("Ddong6lolcarousell")
+            self.page.click("#passwordNext")
+
+            # wait for loading
+            time.sleep(15)
+
+            # skip free trial and tutorial pages
+            if self.page.locator("//*[@id='__next']/div[1]/div/div[1]/button").is_visible():
+                self.page.locator("//*[@id='__next']/div[1]/div/div[1]/button").click()
+
+            if self.page.locator("//button[text()='Skip']").is_visible():
+                self.page.locator("//button[text()='Skip']").click()
+
+            # check if entering main dashboard
+            login_result = self.page.locator("//a[@href='/sat/profile/account']").is_visible()
+            self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("outputs", "login.png"))
+        except Exception as err:
+            print(f"err: {err}")
+            self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("outputs", "login_error.png"))
+            self.close()
+        finally:
+            return login_result
+
+    def sign_out(self):
+        logout_result = False
+        try:
+            # log out
+            self.page.locator("//a[@href='/sat/profile/account']").nth(0).click()
+            self.page.locator("//a[@href='/sat/profile/settings']").click()
+            self.page.locator("//button[text()='LOG OUT']").click()
+            self.page.locator("//button[text()='Yes']").click()
+            time.sleep(3)
+
+            logout_result = self.page.locator("//body[@class='login-lock']").is_visible()
+            self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("outputs", "logout.png"))
+        except Exception as err:
+            print(f"err: {err}")
+            self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("outputs", "logout_error.png"))
+            self.close()
+        finally:
+            return logout_result
+
+    def change_birthday(self, date_to_change):
+        change_result = False
+        try:
+            target_date = list(map(int, date_to_change.split("/")))
+            year, month, day = target_date[0], target_date[1], target_date[2]
+            # edit birthday date
+            self.page.locator("//a[@href='/sat/profile/account']").click()
+            curdate_txt = self.page.locator("//input[@name='birthday']").get_attribute("value")
+            curdate = "0/0/0" if not curdate_txt else curdate_txt
+            print(f"xxxx{curdate_txt}")
+            curbir = list(map(int, curdate.split("/")))
+            bir_year, bir_month, bir_day = curbir[2], curbir[0], curbir[1]
+
+            if not (date(year, month, day) == date(bir_year, bir_month, bir_day)):
+                self.page.locator("//input[@name='birthday']").click()
+                self.page.locator("//button[@title='Pick year']").click()
+                self.page.locator(f"//button[@data-year='{year}']").click()
+                year_month_string = self.page.locator("//button[@title='Pick year']/p[1]").text_content()
+                cur_month = month_converter(year_month_string.split(" ")[0])
+                while cur_month != month:
+                    if cur_month > month:
+                        self.page.locator("//button[@title='Previous month']").click()
+                    elif cur_month < month:
+                        self.page.locator("//button[@title='Next month']").click()
+                    else:
+                        break
+                    year_month_string = year_month_string = self.page.locator("//button[@title='Pick year']/p[1]").text_content()
+                    cur_month = month_converter(year_month_string.split(" ")[0])
+                    time.sleep(1)
+                self.page.locator(f"//button[text()='{day}']").nth(0).click()
+                self.page.locator("//button[text()='OK']").click()
+                time.sleep(1)
+
+                # clear hightschool graduation
+                self.page.locator("//input[@name='highSchool']").fill("")
+                self.page.keyboard.press("Tab")
+                self.page.keyboard.press("Backspace")
+                self.page.locator(f"//div[text()='Save']").click()
+                if self.page.locator("//*[@id='__next']/div[1]/div/div[1]/button").is_visible():
+                    self.page.locator("//*[@id='__next']/div[1]/div/div[1]/button").click()
+                change_result = True
+                time.sleep(1)
+            else:
+                print(f"Current date is already {date_to_change}. Please input another date")
+            self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("outputs", "date.png"))
+        except Exception as err:
+            print(f"err: {err}")
+            self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("outputs", "chagedate_error.png"))
+            self.close()
+        finally:
+            return change_result
+
+
+# def aha_e2e_test(web_page, login_user, login_pwd, change_date):
+
+#     with sync_playwright() as p:
+#         browser = p.firefox.launch(headless=False)
+#         self.page = browser.new_page()
+#         # goto aha page
+#         self.page.goto("https://www.earnaha.com/")
+
+#         # login to google oauth
+#         self.page.click("text=Log In")
+#         self.page.click("text=Continue with Google")
+#         self.page.locator("input[name='identifier']").fill("eddiefree27@gmail.com")
+#         self.page.click("#identifierNext")
+#         time.sleep(2)
+#         try:
+#             self.page.keyboard.press("Escape")
+#             self.page.click("#identifierNext")
+#         except Exception as err:
+#             pass
+#         self.page.locator("input[name='password'], input[name='Passwd']").fill("Ddong6lolcarousell")
+#         self.page.click("#passwordNext")
+
+#         # wait for loading
+#         time.sleep(15)
+
+#         # skip free trial and tutorial pages
+#         if self.page.locator("//*[@id='__next']/div[1]/div/div[1]/button").is_visible():
+#             self.page.locator("//*[@id='__next']/div[1]/div/div[1]/button").click()
+
+#         if self.page.locator("//button[text()='Skip']").is_visible():
+#             self.page.locator("//button[text()='Skip']").click()
+
+#         # check if entering main dashboard
+#         result = self.page.locator("//a[@href='/sat/profile/account']").is_visible()
+#         browser.close()
+#         return result
+
+
+def month_converter(month):
+    months = ['January', 'February', 'March',
+              'April', 'May', 'June', 'July',
+              'August', 'September', 'October',
+              'November', 'December'
+              ]
+    return months.index(month) + 1
+
+
+if __name__ == "__main__":
+    obj = Aha()
+    obj.open_firefox_to_page("https://www.earnaha.com/")
+    loging_result = obj.sign_in_with_google_oauth(
+        "eddiefree27@gmail.com",
+        "Ddong6lolcarousell"
+    )
+    print(f"loging: {loging_result}")
+    change_result = obj.change_birthday("1992/10/30")
+    print(f"change_date: {change_result}")
+    logout_result = obj.sign_out()
+    print(f"logout: {logout_result}")
