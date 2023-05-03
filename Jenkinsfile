@@ -48,26 +48,27 @@ pipeline {
         stage('Run Autobot') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'google_oauth_credentials', usernameVariable: 'GOOGLE_USERNAME', passwordVariable: 'GOOGLE_PASSWORD')]) {
-                    sh 'docker run --rm -e GOOGLE_USERNAME=$GOOGLE_USERNAME -e GOOGLE_PASSWORD=$GOOGLE_PASSWORD -e DATE_TO_CHANGE=$CHANGE_DATE -v $(pwd)/results:/results autobot'
+                    sh 'mkdir -p results'
+                    sh 'docker run --name autobot_instance -e GOOGLE_USERNAME=$GOOGLE_USERNAME -e GOOGLE_PASSWORD=$GOOGLE_PASSWORD -e DATE_TO_CHANGE=$CHANGE_DATE -v $(pwd)/results:/results autobot'
                 }
                 // Copy the log.html file from the Docker container to the Jenkins workspace
-                sh 'docker cp $(docker ps -q --filter ancestor=autobot):/app/log.html .'
+                sh 'docker rm -f autobot_instance'
             }
         }
     }
-    post {
-        always {
-            emailext (
-                subject: 'Autobot Results',
-                body: 'Please find the Autobot results in the attached log.',
-                attachLog: true,
-                to: env.EMAIL_RECIPIENTS,
-                mimeType: 'text/html',
-                attachmentsPattern: "results/*.html"
-            )
-            // slackSend (
-            //     channel: '#your-slack-channel',
-            //     message: "Autobot results are available for")
-        }
-    }
+    // post {
+    //     always {
+    //         emailext (
+    //             subject: 'Autobot Results',
+    //             body: 'Please find the Autobot results in the attached log.',
+    //             attachLog: true,
+    //             to: env.EMAIL_RECIPIENTS,
+    //             mimeType: 'text/html',
+    //             attachmentsPattern: "results/*.html"
+    //         )
+    //         // slackSend (
+    //         //     channel: '#your-slack-channel',
+    //         //     message: "Autobot results are available for")
+    //     }
+    // }
 }
