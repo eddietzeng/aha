@@ -1,28 +1,20 @@
-FROM ubuntu:20.04
+FROM python:3.9-slim
 
-# Update packages
-RUN apt-get update
+ENV GOOGLE_USERNAME=default_username
+ENV GOOGLE_PASSWORD=default_password
+ENV DATE_TO_CHANGE=default_date
 
-# Install Python 3.7 and pip
-RUN apt-get install -y python3.7 python3-pip
+# Install dependencies
+RUN apt-get update && apt-get install -y libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxfixes3 libxi6 libxrandr2 libasound2 libatk1.0-0 libatk-bridge2.0-0 libgtk-3-0 libnss3 libxss1 libxtst6
 
-# Install dependencies required by Playwright
-RUN apt-get install -y libnss3-dev libgconf-2-4 libfontconfig1-dev libx11-dev libxkbfile-dev
+# Install Python dependencies
+COPY requirements.txt ./
+RUN pip install -r requirements.txt
+RUN python3 -m playwright install
+RUN python3 -m playwright install-deps 
 
-# Install Playwright via pip
-RUN python3.7 -m pip install playwright
+# Copy Autobot code
+COPY . ./
 
-# Install browser dependencies for Playwright
-RUN python3.7 -m playwright install
-
-# Set environment variables for Playwright
-ENV PLAYWRIGHT_BROWSERS_PATH=/usr/local/share/playwright
-
-# Set working directory
-WORKDIR /app
-
-# Copy project files to working directory
-COPY . /app
-
-# Set default command to run when container starts
-CMD ["python3.7", "app.py"]
+# Set the entrypoint
+ENTRYPOINT ["robot", "-d", "results","cases/case1_signin.robot"]

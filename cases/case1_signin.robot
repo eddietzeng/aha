@@ -11,6 +11,10 @@ Test Google OAuth Sign In
     Sign In To Existing Account With Google OAuth
     Validate Sign In
 
+Test Chage Birthday Date
+    Chage Birthday Date
+    Validate Change Date
+
 Test Sign Out
     Sign Out Web Page
     Validate Sign Out

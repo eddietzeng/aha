@@ -6,8 +6,9 @@ Library    ../lib/Aha.py    WITH NAME    Aha_Lib
 *** Variables ***
 ${browser_obj}        ${EMPTY}
 ${test_page}          https://www.earnaha.com/
-${google_user}        eddiefree27@gmail.com
-${google_password}    Ddong6lolcarousell
+${google_user}        %{GOOGLE_USER_NAME}
+${google_password}    %{GOOGLE_PASSWORD}
+${date_to_change}     %{DATE_TO_CHANGE}
 
 *** Keywords ***
 
@@ -27,3 +28,10 @@ Sign Out Web Page
 
 Validate Sign Out
     Should Be True    ${sign_out_result}
+
+Chage Birthday Date
+    ${chage_result} =    Change Birthday    ${date_to_change}
+    Set Global Variable    ${chage_result}
+
+Validate Change Date
+    Should Be True    ${chage_result}

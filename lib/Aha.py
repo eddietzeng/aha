@@ -1,12 +1,18 @@
+import os
 import time
-import re
 
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 from datetime import date
 
-# from pages.login.locators import LoginLocator
-# from pages.profile.locators import ProfileLocator
+
+def month_converter(month):
+    months = ['January', 'February', 'March',
+              'April', 'May', 'June', 'July',
+              'August', 'September', 'October',
+              'November', 'December'
+              ]
+    return months.index(month) + 1
 
 
 class Aha():
@@ -39,16 +45,15 @@ class Aha():
             # login to google oauth
             self.page.click("text=Log In")
             self.page.click("text=Continue with Google")
-            self.page.locator("input[name='identifier']").fill("eddiefree27@gmail.com")
-            self.page.click("#identifierNext")
-            # self.page.locator("//span[text()='Next' or text()='繼續' or text()='下一步']").click()
+            self.page.locator("input[name='identifier']").fill(user)
+            self.page.click("//span[text()='Next' or text()='繼續' or text()='下一步']")
             time.sleep(2)
             if not self.page.locator("input[name='password'], input[name='Passwd']").is_visible():
                 self.page.keyboard.press("Escape")
-                self.page.click("#identifierNext")
+                self.page.click("//span[text()='Next' or text()='繼續' or text()='下一步']")
 
-            self.page.locator("input[name='password'], input[name='Passwd']").fill("Ddong6lolcarousell")
-            self.page.click("#passwordNext")
+            self.page.locator("input[name='password'], input[name='Passwd']").fill(password)
+            self.page.click("//span[text()='Next' or text()='繼續' or text()='下一步']")
 
             # wait for loading
             time.sleep(15)
@@ -93,16 +98,17 @@ class Aha():
         change_result = False
         try:
             target_date = list(map(int, date_to_change.split("/")))
-            year, month, day = target_date[0], target_date[1], target_date[2]
+            year, month, day = target_date[2], target_date[0], target_date[1]
             # edit birthday date
             self.page.locator("//a[@href='/sat/profile/account']").click()
             curdate_txt = self.page.locator("//input[@name='birthday']").get_attribute("value")
-            curdate = "0/0/0" if not curdate_txt else curdate_txt
-            print(f"xxxx{curdate_txt}")
+            print(f"!!!!{curdate_txt}")
+            curdate = "1/1/1" if not curdate_txt else curdate_txt
             curbir = list(map(int, curdate.split("/")))
+            print(f"xxxx{curbir}")
             bir_year, bir_month, bir_day = curbir[2], curbir[0], curbir[1]
 
-            if not (date(year, month, day) == date(bir_year, bir_month, bir_day)):
+            if date(year, month, day) != date(bir_year, bir_month, bir_day):
                 self.page.locator("//input[@name='birthday']").click()
                 self.page.locator("//button[@title='Pick year']").click()
                 self.page.locator(f"//button[@data-year='{year}']").click()
@@ -142,53 +148,6 @@ class Aha():
             return change_result
 
 
-# def aha_e2e_test(web_page, login_user, login_pwd, change_date):
-
-#     with sync_playwright() as p:
-#         browser = p.firefox.launch(headless=False)
-#         self.page = browser.new_page()
-#         # goto aha page
-#         self.page.goto("https://www.earnaha.com/")
-
-#         # login to google oauth
-#         self.page.click("text=Log In")
-#         self.page.click("text=Continue with Google")
-#         self.page.locator("input[name='identifier']").fill("eddiefree27@gmail.com")
-#         self.page.click("#identifierNext")
-#         time.sleep(2)
-#         try:
-#             self.page.keyboard.press("Escape")
-#             self.page.click("#identifierNext")
-#         except Exception as err:
-#             pass
-#         self.page.locator("input[name='password'], input[name='Passwd']").fill("Ddong6lolcarousell")
-#         self.page.click("#passwordNext")
-
-#         # wait for loading
-#         time.sleep(15)
-
-#         # skip free trial and tutorial pages
-#         if self.page.locator("//*[@id='__next']/div[1]/div/div[1]/button").is_visible():
-#             self.page.locator("//*[@id='__next']/div[1]/div/div[1]/button").click()
-
-#         if self.page.locator("//button[text()='Skip']").is_visible():
-#             self.page.locator("//button[text()='Skip']").click()
-
-#         # check if entering main dashboard
-#         result = self.page.locator("//a[@href='/sat/profile/account']").is_visible()
-#         browser.close()
-#         return result
-
-
-def month_converter(month):
-    months = ['January', 'February', 'March',
-              'April', 'May', 'June', 'July',
-              'August', 'September', 'October',
-              'November', 'December'
-              ]
-    return months.index(month) + 1
-
-
 if __name__ == "__main__":
     obj = Aha()
     obj.open_firefox_to_page("https://www.earnaha.com/")
@@ -197,7 +156,7 @@ if __name__ == "__main__":
         "Ddong6lolcarousell"
     )
     print(f"loging: {loging_result}")
-    change_result = obj.change_birthday("1992/10/30")
+    change_result = obj.change_birthday("11/30/1993")
     print(f"change_date: {change_result}")
     logout_result = obj.sign_out()
     print(f"logout: {logout_result}")

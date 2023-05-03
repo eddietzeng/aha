@@ -1,5 +1,7 @@
 FROM ubuntu:20.04
 
+ENV GOOGLE_USER=google_user
+
 # Install dependencies
 RUN apt-get update \
     && DEBIAN_FRONTEND="noninteractive" apt-get -y install tzdata \
