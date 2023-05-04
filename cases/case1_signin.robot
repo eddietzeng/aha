@@ -7,8 +7,8 @@ Resource        ../res/common.robot
 
 *** Test Cases ***
 Test
-    Log To Console     ${GOOGLE_USERNAME}
-    Log To Console     ${GOOGLE_PASSWORD}
+    Log To Console     ${google_user}
+    Log To Console     ${google_password}
     
 Test Google OAuth Sign In
     Open Firfox To Web Page
