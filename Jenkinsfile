@@ -79,5 +79,5 @@ pipeline {
             //     channel: '#your-slack-channel',
             //     message: "Autobot results are available for")
         }
-    // }
+   }
 }
