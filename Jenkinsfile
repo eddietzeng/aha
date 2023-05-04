@@ -65,19 +65,19 @@ pipeline {
             }
         }
     }
-    // post {
-    //     always {
-    //         emailext (
-    //             subject: 'Autobot Results',
-    //             body: 'Please find the Autobot results in the attached log.',
-    //             attachLog: true,
-    //             to: env.EMAIL_RECIPIENTS,
-    //             mimeType: 'text/html',
-    //             attachmentsPattern: "results/*.html"
-    //         )
-    //         // slackSend (
-    //         //     channel: '#your-slack-channel',
-    //         //     message: "Autobot results are available for")
-    //     }
+    post {
+        always {
+            emailext (
+                subject: 'Autobot Results',
+                body: 'Please find the Autobot results in the attached log.',
+                attachLog: true,
+                to: env.EMAIL_RECIPIENTS,
+                mimeType: 'text/html',
+                attachmentsPattern: "results/*.html"
+            )
+            // slackSend (
+            //     channel: '#your-slack-channel',
+            //     message: "Autobot results are available for")
+        }
     // }
 }
