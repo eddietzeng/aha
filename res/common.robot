@@ -6,7 +6,7 @@ Library    ../lib/Aha.py    WITH NAME    Aha_Lib
 *** Variables ***
 ${browser_obj}        ${EMPTY}
 ${test_page}          https://www.earnaha.com/
-${google_user}        %{GOOGLE_USER_NAME}
+${google_user}        %{GOOGLE_USERNAME}
 ${google_password}    %{GOOGLE_PASSWORD}
 ${date_to_change}     %{DATE_TO_CHANGE}
 
