@@ -25,7 +25,7 @@ class Aha():
     def open_firefox_to_page(self, test_page):
         try:
             p = sync_playwright().start()
-            self.browser = p.firefox.launch(headless=True)
+            self.browser = p.firefox.launch(headless=False)
             self.page = self.browser.new_page()
             self.page.goto(test_page)
             self.page.wait_for_load_state("domcontentloaded")
