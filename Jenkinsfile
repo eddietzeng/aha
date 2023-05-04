@@ -42,7 +42,8 @@ pipeline {
         stage('Test'){
             steps {
                 sh 'mkdir -p results'
-                sh 'list'
+                sh 'ls'
+                sh 'echo $(pwd)'
             }
         }
 
