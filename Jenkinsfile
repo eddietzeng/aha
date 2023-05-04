@@ -58,7 +58,7 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'google_oauth_credentials', usernameVariable: 'GOOGLE_USERNAME', passwordVariable: 'GOOGLE_PASSWORD')]) {
                     sh 'mkdir -p results'
-                    sh 'docker run --name autobot_instance -e GOOGLE_USERNAME=$GOOGLE_USERNAME -e GOOGLE_PASSWORD=$GOOGLE_PASSWORD -e DATE_TO_CHANGE=$CHANGE_DATE -v $(pwd)/results:/app/results autobot'
+                    sh 'docker run -e GOOGLE_USERNAME=$GOOGLE_USERNAME -e GOOGLE_PASSWORD=$GOOGLE_PASSWORD -e DATE_TO_CHANGE=$CHANGE_DATE -v $(pwd)/results:/app/results autobot'
                 }
                 // Copy the log.html file from the Docker container to the Jenkins workspace
                 sh 'docker rm -f autobot_instance'
