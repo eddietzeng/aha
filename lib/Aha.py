@@ -95,17 +95,15 @@ class Aha():
             return logout_result
 
     def change_birthday(self, date_to_change):
-        change_result = False
+        change_result = True
         try:
             target_date = list(map(int, date_to_change.split("/")))
             year, month, day = target_date[2], target_date[0], target_date[1]
             # edit birthday date
             self.page.locator("//a[@href='/sat/profile/account']").click()
             curdate_txt = self.page.locator("//input[@name='birthday']").get_attribute("value")
-            print(f"!!!!{curdate_txt}")
             curdate = "1/1/1" if not curdate_txt else curdate_txt
             curbir = list(map(int, curdate.split("/")))
-            print(f"xxxx{curbir}")
             bir_year, bir_month, bir_day = curbir[2], curbir[0], curbir[1]
 
             if date(year, month, day) != date(bir_year, bir_month, bir_day):
@@ -135,12 +133,12 @@ class Aha():
                 self.page.locator(f"//div[text()='Save']").click()
                 if self.page.locator("//*[@id='__next']/div[1]/div/div[1]/button").is_visible():
                     self.page.locator("//*[@id='__next']/div[1]/div/div[1]/button").click()
-                change_result = True
                 time.sleep(1)
             else:
                 print(f"Current date is already {date_to_change}. Please input another date")
             self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("outputs", "date.png"))
         except Exception as err:
+            change_result = False
             print(f"err: {err}")
             self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("outputs", "chagedate_error.png"))
             self.close()

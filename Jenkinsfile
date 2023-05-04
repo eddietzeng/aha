@@ -65,11 +65,11 @@ pipeline {
         stage('Run Autobot') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'google_oauth_credentials', usernameVariable: 'GOOGLE_USERNAME', passwordVariable: 'GOOGLE_PASSWORD')]) {
-                    sh 'docker rm -f autobot_instance'
-                    sh 'docker run --name autobot_instance -e GOOGLE_USERNAME=$GOOGLE_USERNAME -e GOOGLE_PASSWORD=$GOOGLE_PASSWORD -e DATE_TO_CHANGE=${CHANGE_DATE} autobot'
+                    // sh 'docker rm -f autobot_instance'
+                    sh 'docker run -e GOOGLE_USERNAME=$GOOGLE_USERNAME -e GOOGLE_PASSWORD=$GOOGLE_PASSWORD -e DATE_TO_CHANGE=${CHANGE_DATE} -v ${RESULTS_DIR}:/app/results autobot'
                     // Copy the log.html file from the Docker container to the Jenkins workspace
-                    sh 'docker cp $(docker ps -q --filter ancestor=autobot_instance):/app/results/log.html ${RESULTS_DIR}'
-                    sh 'docker cp $(docker ps -q --filter ancestor=autobot_instance):/app/results/log.html .'
+                    // sh 'docker cp $(docker ps -q --filter ancestor=autobot_instance):/app/results/log.html ${RESULTS_DIR}'
+                    // sh 'docker cp $(docker ps -q --filter ancestor=autobot_instance):/app/results/log.html .'
                     
                 }
                 
@@ -95,7 +95,7 @@ pipeline {
             // slackSend (
             //     channel: '#your-slack-channel',
             //     message: "Autobot results are available for")
-            archiveArtifacts(artifacts: "**/log.html", followSymlinks: false)
+            archiveArtifacts(artifacts: "**/log.html", fingerprint: true)
         }
    }
 }
