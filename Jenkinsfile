@@ -2,7 +2,22 @@ pipeline {
     agent any
 
     stages {
-//         stage('Setup Parameters') {
+        stage('Setup Parameters') {
+        stage('Test'){
+            steps {
+                sh 'rm -rf results'
+                sh 'ls $(pwd)'
+                sh 'echo ${WORKSPACE}'
+            }
+            sh(script: "mkdir -p $(pwd)/results", label: "Creating results directory")
+        }
+        stage('Test2'){
+            steps {
+                sh 'ls $(pwd)'
+                sh 'echo ${WORKSPACE}'
+            }
+            
+        }
 //             steps {
 //                 script {
 //                     def userInput = input(
@@ -38,20 +53,6 @@ pipeline {
 //                 }
 //             }
 //         }
-
-        stage('Test'){
-            steps {
-                sh 'rm -rf results'
-                sh 'ls $(pwd)'
-                sh 'mkdir -p results'
-                sh 'ls $(pwd)'
-            }
-        stage('Test2'){
-            steps {
-                sh 'ls $(pwd)'
-                sh 'ls $(pwd)/results'
-            }
-        }
 
 //         stage('Build Docker Image') {
 //             steps {
