@@ -6,6 +6,10 @@ Resource        ../res/common.robot
 *** Variables ***
 
 *** Test Cases ***
+Test
+    Log To Console     ${GOOGLE_USERNAME}
+    Log To Console     ${GOOGLE_PASSWORD}
+    
 Test Google OAuth Sign In
     Open Firfox To Web Page
     Sign In To Existing Account With Google OAuth
