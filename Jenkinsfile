@@ -41,6 +41,7 @@ pipeline {
 
         stage('Test'){
             steps {
+                sh 'rm -rf results'
                 sh 'ls $(pwd)'
                 sh 'mkdir -p results'
                 sh 'ls $(pwd)'
