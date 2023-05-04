@@ -42,9 +42,8 @@ pipeline {
         stage('Test'){
             steps {
                 sh 'mkdir -p results'
-                sh 'ls'
-                sh 'pwd'
-                sh 'echo $(pwd)'
+                sh 'cat $(pwd)/requirements.txt '
+                sh 'ls $(pwd)/results'
             }
         }
 
