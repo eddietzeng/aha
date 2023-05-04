@@ -19,24 +19,6 @@ pipeline {
             }
             
         }
-        // stage('Setup Parameters') {
-        //     steps {
-        //         script {
-        //             def userInput = input(
-        //                 id: 'userInput',
-        //                 message: 'Please provide the following parameters:',
-        //                 parameters: [
-        //                     string(name: 'EMAIL_RECIPIENTS', description: 'Email addresses of the recipients (separated by comma)'),
-        //                     string(name: 'SLACK_CHANNEL', description: 'Slack channel to send the notification'),
-        //                     string(name: 'CHANGE_DATE', description: 'Date in format MM/DD/YYYY')
-        //                 ]
-        //             )
-        //             env.EMAIL_RECIPIENTS = userInput.EMAIL_RECIPIENTS
-        //             env.SLACK_CHANNEL = userInput.SLACK_CHANNEL
-        //             env.CHANGE_DATE = userInput.CHANGE_DATE
-        //         }
-        //     }
-        // }
 
         stage('Checkout') {
             steps {
@@ -65,20 +47,17 @@ pipeline {
         stage('Run Autobot') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'google_oauth_credentials', usernameVariable: 'GOOGLE_USERNAME', passwordVariable: 'GOOGLE_PASSWORD')]) {
-                    // sh 'docker rm -f autobot_instance'
-                    sh 'docker run -e GOOGLE_USERNAME=$GOOGLE_USERNAME -e GOOGLE_PASSWORD=$GOOGLE_PASSWORD -e DATE_TO_CHANGE=${CHANGE_DATE} -v ${RESULTS_DIR}:/app/results autobot'
-                    // Copy the log.html file from the Docker container to the Jenkins workspace
-                    // sh 'docker cp $(docker ps -q --filter ancestor=autobot_instance):/app/results/log.html ${RESULTS_DIR}'
-                    // sh 'docker cp $(docker ps -q --filter ancestor=autobot_instance):/app/results/log.html .'
-                    
+                    sh 'docker rm -f autobot_instance'
+                    sh 'docker run --name autobot_instance -e GOOGLE_USERNAME=$GOOGLE_USERNAME -e GOOGLE_PASSWORD=$GOOGLE_PASSWORD -e DATE_TO_CHANGE=${CHANGE_DATE} -v results:/app/results autobot'
                 }
                 
             }
         }
-        stage('Test') {
+        stage('List') {
             steps {
                 sh 'ls'
                 sh 'ls ${RESULTS_DIR}'
+                sh 'ls results'
             }
         }
     }
