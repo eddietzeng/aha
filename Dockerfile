@@ -14,7 +14,8 @@ RUN python3 -m playwright install
 RUN python3 -m playwright install-deps 
 
 # Copy Autobot code
-COPY . ./
+WORKDIR /app
+COPY . /app
 
 # Set the entrypoint
 ENTRYPOINT ["robot", "-d", "results","cases/case1_signin.robot"]
