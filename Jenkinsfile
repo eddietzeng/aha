@@ -43,6 +43,7 @@ pipeline {
             steps {
                 sh 'mkdir -p results'
                 sh 'ls'
+                sh 'pwd'
                 sh 'echo $(pwd)'
             }
         }
