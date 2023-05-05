@@ -67,10 +67,10 @@ class Aha():
 
             # check if entering main dashboard
             login_result = self.page.locator("//a[@href='/sat/profile/account']").is_visible()
-            self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("outputs", "login.png"))
+            self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("results", "login.png"))
         except Exception as err:
             print(f"err: {err}")
-            self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("outputs", "login_error.png"))
+            self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("results", "login_error.png"))
             self.close()
         finally:
             return login_result
@@ -86,10 +86,10 @@ class Aha():
             time.sleep(3)
 
             logout_result = self.page.locator("//body[@class='login-lock']").is_visible()
-            self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("outputs", "logout.png"))
+            self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("results", "logout.png"))
         except Exception as err:
             print(f"err: {err}")
-            self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("outputs", "logout_error.png"))
+            self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("results", "logout_error.png"))
             self.close()
         finally:
             return logout_result
@@ -136,11 +136,11 @@ class Aha():
                 time.sleep(1)
             else:
                 print(f"Current date is already {date_to_change}. Please input another date")
-            self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("outputs", "date.png"))
+            self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("results", "date.png"))
         except Exception as err:
             change_result = False
             print(f"err: {err}")
-            self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("outputs", "chagedate_error.png"))
+            self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("results", "chagedate_error.png"))
             self.close()
         finally:
             return change_result
