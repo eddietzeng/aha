@@ -4,7 +4,8 @@ pipeline {
         EMAIL_RECIPIENTS = "eddiefree27@gmail.com"
         SLACK_CHANNEL = ""
         CHANGE_DATE = "3/2/1990"
-        RESULTS_DIR = "${WORKSPACE}/results"
+        BUILD_DIR = "${WORKSPACE}/${BUILD_NUMBER}"
+        RESULTS_DIR = "${BUILD_DIR}/results"
         // login_user = "eddiefree27@gmail.com"
         // login_pwd = "Ddong6lolcarousell"
     }
@@ -12,69 +13,72 @@ pipeline {
     stages {
         stage('Prepare Environment'){
             steps {
-                sh 'rm -rf ${RESULTS_DIR}'
+                sh(script: "mkdir -p ${BUILD_DIR} ${RESULTS_DIR}", label: "Creating results directory")
+                sh 'ls ${BUILD_DIR}'
                 sh 'ls'
-                sh(script: "mkdir -p ${RESULTS_DIR}", label: "Creating results directory")
-                sh 'ls'
+                sh "chmod 755 ${RESULTS_DIR}"
             }
             
         }
 
-        stage('Checkout') {
+    stage('Check Permissions') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'github-credentials', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
-                    checkout([
-                        $class: 'GitSCM',
-                        branches: [[name: '*/master']], // Replace with the branch you want to build
-                        doGenerateSubmoduleConfigurations: false,
-                        extensions: [],
-                        submoduleCfg: [],
-                        userRemoteConfigs: [[
-                            url: 'https://github.com/eddietzeng/aha.git',
-                            credentialsId: 'github-credentials' // Replace with your credentials ID
-                        ]]
-                    ])
+                script {
+                    // Check the permissions of BUILD_DIR
+                    sh "ls -ld ${BUILD_DIR}"
+
+                    // Check the permissions of RESULTS_DIR
+                    sh "ls -ld ${RESULTS_DIR}"
                 }
             }
         }
 
-        stage('Build Docker Image') {
-            steps {
-                sh 'docker build -t autobot . --no-cache'
-            }
-        }
+    // stage('Checkout') {
+    //         steps {
+    //             withCredentials([usernamePassword(credentialsId: 'github-credentials', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+    //                 checkout([
+    //                     $class: 'GitSCM',
+    //                     branches: [[name: '*/master']], // Replace with the branch you want to build
+    //                     doGenerateSubmoduleConfigurations: false,
+    //                     extensions: [],
+    //                     submoduleCfg: [],
+    //                     userRemoteConfigs: [[
+    //                         url: 'https://github.com/eddietzeng/aha.git',
+    //                         credentialsId: 'github-credentials' // Replace with your credentials ID
+    //                     ]]
+    //                 ])
+    //             }
+    //         }
+    //     }
 
-//         stage('Run Autobot') {
-//             steps {
-//                 withCredentials([usernamePassword(credentialsId: 'google_oauth_credentials', usernameVariable: 'GOOGLE_USERNAME', passwordVariable: 'GOOGLE_PASSWORD')]) {
-//                     sh 'docker rm -f autobot_instance'
-//                     sh 'docker run --name autobot_instance -e GOOGLE_USERNAME=$GOOGLE_USERNAME -e GOOGLE_PASSWORD=$GOOGLE_PASSWORD -e DATE_TO_CHANGE=${CHANGE_DATE} -v results:/app/results autobot'
-//                 }
-                
-//             }
-//         }
-        stage('Run Autobot') {
-            steps {
-                catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
-                    withCredentials([usernamePassword(credentialsId: 'google_oauth_credentials', usernameVariable: 'GOOGLE_USERNAME', passwordVariable: 'GOOGLE_PASSWORD')]) {
-                        sh 'docker rm -f autobot_instance'
-                        sh 'docker run --name autobot_instance -e GOOGLE_USERNAME=$GOOGLE_USERNAME -e GOOGLE_PASSWORD=$GOOGLE_PASSWORD -e DATE_TO_CHANGE=${CHANGE_DATE} -v ${WORKSPACE}/results:/app/results autobot'
-                    }
-                }
-            }
-            post {
-                failure {
-                    sh 'ls results'
-                }
-            }
-        }
-        stage('List') {
-            steps {
-                sh 'ls'
-                sh 'ls ${RESULTS_DIR}'
-                sh 'ls results'
-            }
-        }
+    //     stage('Build Docker Image') {
+    //         steps {
+    //             sh 'docker build -t autobot . --no-cache'
+    //         }
+    //     }
+
+    //     stage('Run Autobot') {
+    //         steps {
+    //             catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+    //                 withCredentials([usernamePassword(credentialsId: 'google_oauth_credentials', usernameVariable: 'GOOGLE_USERNAME', passwordVariable: 'GOOGLE_PASSWORD')]) {
+    //                     sh 'docker rm -f autobot_instance'
+    //                     sh 'docker run --name autobot_instance -e GOOGLE_USERNAME=$GOOGLE_USERNAME -e GOOGLE_PASSWORD=$GOOGLE_PASSWORD -e DATE_TO_CHANGE=${CHANGE_DATE} -v ${RESULTS_DIR}:/app/results autobot'
+    //                 }
+    //             }
+    //         }
+    //         post {
+    //             failure {
+    //                 sh 'ls results'
+    //             }
+    //         }
+    //     }
+    //     stage('List') {
+    //         steps {
+    //             sh 'ls'
+    //             sh 'ls ${RESULTS_DIR}'
+    //             sh 'ls results'
+    //         }
+    //     }
     }
     post {
         always {
@@ -89,7 +93,7 @@ pipeline {
             // slackSend (
             //     channel: '#your-slack-channel',
             //     message: "Autobot results are available for")
-            archiveArtifacts(artifacts: "**/log.html, **/*.png", fingerprint: true)
+            archiveArtifacts(artifacts: "$BUILD_ID/results/*.html, $BUILD_ID/fdxulgx/*.png", fingerprint: true)
         }
    }
 }
