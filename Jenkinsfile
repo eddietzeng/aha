@@ -64,7 +64,7 @@ pipeline {
             }
             post {
                 failure {
-                    sh 'ls reuslts'
+                    sh 'ls results'
                 }
             }
         }
