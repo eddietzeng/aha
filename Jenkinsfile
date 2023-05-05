@@ -89,7 +89,7 @@ pipeline {
             // slackSend (
             //     channel: '#your-slack-channel',
             //     message: "Autobot results are available for")
-            archiveArtifacts(artifacts: "**/log.html", fingerprint: true)
+            archiveArtifacts(artifacts: "**/log.html, **/*.png", fingerprint: true)
         }
    }
 }
