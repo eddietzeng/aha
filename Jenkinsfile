@@ -5,7 +5,7 @@ pipeline {
         SLACK_CHANNEL = ""
         CHANGE_DATE = "3/2/1990"
         BUILD_DIR = "/var/jenkins_home/workspace"
-        RESULTS_DIR = "${BUILD_DIR}/results"
+        RESULTS_DIR = "/jenkins/results"
         // login_user = "eddiefree27@gmail.com"
         // login_pwd = "Ddong6lolcarousell"
     }
@@ -14,26 +14,29 @@ pipeline {
         stage('Prepare Environment'){
             steps {
                 sh 'pwd'
-                sh 'ls ${BUILD_DIR}'
-                sh(script: "mkdir -p ${BUILD_DIR} ${RESULTS_DIR}", label: "Creating results directory")
-                sh 'cp results/date.png ${BUILD_DIR}/date.png'
-                sh 'ls'
+                sh 'mkdir -p /app/results'
+                // sh 'ls ${BUILD_DIR}'
+                // sh(script: "mkdir -p ${BUILD_DIR} ${RESULTS_DIR}", label: "Creating results directory")
+                // sh 'cp results/date.png ${BUILD_DIR}/date.png'
+                // sh 'cp results/date.png /app/results/date.png'
+                // sh 'ls ${BUILD_DIR}'
+                sh 'ls /app/results'
 
             }
             
         }
 
-    stage('Check Permissions') {
-            steps {
-                script {
-                    // Check the permissions of BUILD_DIR
-                    sh "ls -ld ${BUILD_DIR}"
+    // stage('Check Permissions') {
+    //         steps {
+    //             script {
+    //                 // Check the permissions of BUILD_DIR
+    //                 sh "ls -ld ${BUILD_DIR}"
 
-                    // Check the permissions of RESULTS_DIR
-                    sh "ls -ld ${RESULTS_DIR}"
-                }
-            }
-        }
+    //                 // Check the permissions of RESULTS_DIR
+    //                 sh "ls -ld ${RESULTS_DIR}"
+    //             }
+    //         }
+    //     }
 
     stage('Checkout') {
             steps {
@@ -70,16 +73,15 @@ pipeline {
             }
             post {
                 failure {
-                    sh 'ls results'
+                    sh 'ls /app/results'
                     sh 'exit'
                 }
             }
         }
         stage('List') {
             steps {
-                sh 'pwd'
                 sh 'ls'
-                sh 'ls results'
+                sh 'ls /app/results'
             }
         }
     }
@@ -91,12 +93,12 @@ pipeline {
                 attachLog: true,
                 to: env.EMAIL_RECIPIENTS,
                 mimeType: 'text/html',
-                attachmentsPattern: "**/log.html"
+                attachmentsPattern: "/app/results/*.html"
             )
             // slackSend (
             //     channel: '#your-slack-channel',
             //     message: "Autobot results are available for")
-            archiveArtifacts(artifacts: "**/*.html, **/*.png", fingerprint: true)
+            archiveArtifacts(artifacts: "/app/results/*.html", fingerprint: true)
         }
    }
 }
