@@ -4,7 +4,7 @@ pipeline {
         EMAIL_RECIPIENTS = "eddiefree27@gmail.com"
         SLACK_CHANNEL = ""
         CHANGE_DATE = "3/2/1990"
-        BUILD_DIR = "${WORKSPACE}/${BUILD_NUMBER}"
+        BUILD_DIR = "/var/jenkins_home/workspace"
         RESULTS_DIR = "${BUILD_DIR}/results"
         // login_user = "eddiefree27@gmail.com"
         // login_pwd = "Ddong6lolcarousell"
@@ -13,10 +13,11 @@ pipeline {
     stages {
         stage('Prepare Environment'){
             steps {
+                sh 'pwd'
+                sh 'ls /var/jenkins_home/workspace'
                 sh(script: "mkdir -p ${BUILD_DIR} ${RESULTS_DIR}", label: "Creating results directory")
                 sh 'ls ${BUILD_DIR}'
                 sh 'ls'
-                sh "chmod 755 ${RESULTS_DIR}"
             }
             
         }
@@ -69,6 +70,7 @@ pipeline {
             post {
                 failure {
                     sh 'ls results'
+                    sh 'exit'
                 }
             }
         }

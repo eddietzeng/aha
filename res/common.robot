@@ -27,7 +27,8 @@ Sign Out Web Page
     Set Global Variable    ${sign_out_result}
 
 Validate Sign Out
-    Should Be True    ${sign_out_result}
+    Log To Console    ${sign_out_result}
+    Should Contain    ${sign_out_result}    PASS
 
 Chage Birthday Date
     ${chage_result} =    Change Birthday    ${date_to_change}

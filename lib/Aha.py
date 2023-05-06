@@ -76,7 +76,7 @@ class Aha():
             return login_result
 
     def sign_out(self):
-        logout_result = False
+        logout_result = "PASS"
         try:
             # log out
             self.page.locator("//a[@href='/sat/profile/account']").nth(0).click()
@@ -92,6 +92,7 @@ class Aha():
             self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("results", "logout.png"))
         except Exception as err:
             print(f"err: {err}")
+            logout_result = err
             self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("results", "logout_error.png"))
             self.close()
         finally:
