@@ -25,7 +25,7 @@ class Aha():
     def open_firefox_to_page(self, test_page):
         try:
             p = sync_playwright().start()
-            self.browser = p.firefox.launch(headless=True)
+            self.browser = p.firefox.launch(headless=False)
             self.page = self.browser.new_page()
             self.page.goto(test_page)
             self.page.wait_for_load_state("domcontentloaded")
@@ -80,8 +80,11 @@ class Aha():
         try:
             # log out
             self.page.locator("//a[@href='/sat/profile/account']").nth(0).click()
+            time.sleep(1)
             self.page.locator("//a[@href='/sat/profile/settings']").click()
+            time.sleep(1)
             self.page.locator("//button[text()='LOG OUT']").click()
+            time.sleep(1)
             self.page.locator("//button[text()='Yes']").click()
             time.sleep(3)
 
