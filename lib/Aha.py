@@ -40,7 +40,7 @@ class Aha():
             self.browser.close()
 
     def sign_in_with_google_oauth(self, user, password):
-        login_result = False
+        login_result = "PASS"
         try:
             # login to google oauth
             self.page.click("text=Log In")
@@ -66,10 +66,12 @@ class Aha():
                 self.page.locator("//button[text()='Skip']").click()
 
             # check if entering main dashboard
-            login_result = self.page.locator("//a[@href='/sat/profile/account']").is_visible()
+            if not self.page.locator("//a[@href='/sat/profile/account']").is_visible():
+                logout_result = "FAIL"
             self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("results", "login.png"))
         except Exception as err:
             print(f"err: {err}")
+            login_result = err
             self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("results", "login_error.png"))
             self.close()
         finally:
@@ -99,7 +101,7 @@ class Aha():
             return logout_result
 
     def change_birthday(self, date_to_change):
-        change_result = True
+        change_result = "PASS"
         try:
             target_date = list(map(int, date_to_change.split("/")))
             year, month, day = target_date[2], target_date[0], target_date[1]
@@ -142,7 +144,7 @@ class Aha():
                 print(f"Current date is already {date_to_change}. Please input another date")
             self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("results", "date.png"))
         except Exception as err:
-            change_result = False
+            change_result = err
             print(f"err: {err}")
             self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("results", "chagedate_error.png"))
             self.close()
