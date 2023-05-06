@@ -11,18 +11,11 @@ pipeline {
     }
 
     stages {
-        stage('Prepare Environment'){
+        stage('Clean Environment'){
             steps {
                 // sh 'pwd'
                 sh 'rm -f /app/results/*'
-                // sh 'mkdir -p /app/results'
-                // sh 'ls ${BUILD_DIR}'
-                // sh(script: "mkdir -p ${BUILD_DIR} ${RESULTS_DIR}", label: "Creating results directory")
-                // sh 'cp results/date.png ${BUILD_DIR}/date.png'
-                // sh 'cp results/date.png /app/results/date.png'
-                // sh 'ls ${BUILD_DIR}'
-                sh 'ls /app/results'
-
+                sh 'rm -f *.html *.xml *.png'
             }
             
         }
@@ -78,19 +71,29 @@ pipeline {
         always {
             script{
                 sh 'cp /app/results/* .'
+                elapsed_time = currentBuild.durationString.minus(' and counting')
+                if (currentBuild.result == 'SUCCESS') {
+                    color = "good"
+                    message = "PASS"
+                } else {
+                    color = "danger"
+                    message = "FAIL"
+                }
+                email_result = "Result: " + message + "\n" + "elpased time: " + elapsed_time
             }
+            echo "${email_result}"
             emailext (
                 subject: 'Autobot Results',
-                body: 'Please find the Autobot results in the attached log.',
+                body: "${email_result}",
                 attachLog: true,
                 to: env.EMAIL_RECIPIENTS,
                 mimeType: 'text/html',
-                attachmentsPattern: "**/log.html"
+                attachmentsPattern: "*.html, *.png"
             )
             // slackSend (
             //     channel: '#your-slack-channel',
             //     message: "Autobot results are available for")
-            archiveArtifacts(artifacts: "**/log.html, **/*.png", fingerprint: true)
+            archiveArtifacts(artifacts: "*.html, *.png",  fingerprint: true)
         }
    }
 }

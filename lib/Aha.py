@@ -23,7 +23,7 @@ def month_converter(month):
 
 
 class Aha():
-    ROBOT_LIBRARY_SCOPE = "GLOBAL"
+    ROBOT_LIBRARY_SCOPE = "TEST SUITE"
 
     def __init__(self):
         self.browser = None
@@ -91,8 +91,6 @@ class Aha():
             time.sleep(1)
             self.page.locator("//button[text()='Yes']").click()
             time.sleep(3)
-
-            logout_result = self.page.locator("//h2[text()='Login to practice']").is_visible()
             self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("results", "logout.png"))
         except Exception as err:
             logger.error("[Exception] sign_out ", exc_info=True)

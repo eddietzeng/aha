@@ -1,8 +1,8 @@
 *** Settings ***
 Documentation   AHA End to End Tests
 
-Resource        ../res/common.robot
-Suite Teardown    Close
+Resource          ../res/common.robot
+Suite Teardown    Close Page And Browser
 
 *** Variables ***
 
