@@ -65,14 +65,9 @@ class Aha():
             self.page.click("//span[text()='Next' or text()='繼續' or text()='下一步']")
 
             # wait for loading
-            time.sleep(15)
+            time.sleep(20)
 
-            # skip free trial and tutorial pages
-            if self.page.locator("//*[@id='__next']/div[1]/div/div[1]/button").is_visible():
-                self.page.locator("//*[@id='__next']/div[1]/div/div[1]/button").click()
-
-            if self.page.locator("//button[text()='Skip']").is_visible():
-                self.page.locator("//button[text()='Skip']").click()
+            self._skip_free_trial()
 
             # check if entering main dashboard
             login_result = self.page.locator("//a[@href='/sat/profile/account']").is_visible()
@@ -112,8 +107,7 @@ class Aha():
     def change_birthday(self, date_to_change):
         change_result = True
         try:
-            if self.page.locator("//*[@id='__next']/div[1]/div/div[1]/button").is_visible():
-                self.page.locator("//*[@id='__next']/div[1]/div/div[1]/button").click()
+            self._skip_free_trial()
 
             target_date = list(map(int, date_to_change.split("/")))
             year, month, day = target_date[2], target_date[0], target_date[1]
@@ -151,8 +145,7 @@ class Aha():
                 self.page.keyboard.press("Tab")
                 self.page.keyboard.press("Backspace")
                 self.page.locator(f"//div[text()='Save']").click()
-                if self.page.locator("//*[@id='__next']/div[1]/div/div[1]/button").is_visible():
-                    self.page.locator("//*[@id='__next']/div[1]/div/div[1]/button").click()
+                self._skip_free_trial()
                 time.sleep(1)
             else:
                 logger.info(f"Current date is already {date_to_change}. Please input another date")
@@ -164,6 +157,15 @@ class Aha():
             self.close()
         finally:
             return change_result
+
+    def _skip_free_trial(self):
+        # skip free trial and tutorial pages
+        if self.page.locator("//*[@id='__next']/div[1]/div/div[1]/button").is_visible():
+            logger.info("Skip free trial")
+            self.page.locator("//*[@id='__next']/div[1]/div/div[1]/button").click()
+            time.sleep(2)
+            if self.page.locator("//*[@id='__next']/div[1]/div/div[2]/div/button[1]").is_visible():
+                self.page.locator("//*[@id='__next']/div[1]/div/div[2]/div/button[1]").click()
 
 
 if __name__ == "__main__":

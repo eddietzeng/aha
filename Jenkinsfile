@@ -76,18 +76,21 @@ pipeline {
         }
     post {
         always {
+            script{
+                sh 'cp /jenkins/resutls/* .'
+            }
             emailext (
                 subject: 'Autobot Results',
                 body: 'Please find the Autobot results in the attached log.',
                 attachLog: true,
                 to: env.EMAIL_RECIPIENTS,
                 mimeType: 'text/html',
-                attachmentsPattern: "/app/results/*.html"
+                attachmentsPattern: "**/log.html"
             )
             // slackSend (
             //     channel: '#your-slack-channel',
             //     message: "Autobot results are available for")
-            archiveArtifacts(artifacts: "/app/results/*.html", fingerprint: true)
+            archiveArtifacts(artifacts: "**/log.html", fingerprint: true)
         }
    }
 }
