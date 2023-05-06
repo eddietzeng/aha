@@ -1,20 +1,21 @@
 *** Settings ***
-Documentation   SingIn Tests
+Documentation   AHA End to End Tests
 
 Resource        ../res/common.robot
+Suite Teardown    Close
 
 *** Variables ***
 
 *** Test Cases ***
-Test Google OAuth Sign In
+Case 1: Test Google OAuth Sign In
     Open Firfox To Web Page
     Sign In To Existing Account With Google OAuth
     Validate Sign In
 
-Test Chage Birthday Date
+Case 3: Test Chage Birthday Date
     Chage Birthday Date
     Validate Change Date
 
-Test Sign Out
+Case 2: Test Sign Out
     Sign Out Web Page
     Validate Sign Out

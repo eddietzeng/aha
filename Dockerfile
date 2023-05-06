@@ -19,4 +19,4 @@ RUN python3 -m playwright install-deps
 
 
 # Set the entrypoint
-ENTRYPOINT ["robot", "-d", "results","cases/case1_signin.robot"]
+ENTRYPOINT ["robot", "-d", "results","cases"]

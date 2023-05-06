@@ -39,7 +39,6 @@ class Aha():
             self.page.wait_for_load_state("domcontentloaded")
         except Exception as err:
             logger.error(f"Failed to create browser: {err}")
-            self.close()
 
     def close(self):
         if self.page:
@@ -76,7 +75,6 @@ class Aha():
             logger.error("[Exception] sign_in_with_google_oauth ", exc_info=True)
             login_result = False
             self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("results", "login_error.png"))
-            self.close()
         finally:
             return login_result
 
@@ -94,13 +92,12 @@ class Aha():
             self.page.locator("//button[text()='Yes']").click()
             time.sleep(3)
 
-            logout_result = self.page.locator("//body[@class='login-lock']").is_visible()
+            logout_result = self.page.locator("//h2[text()='Login to practice']").is_visible()
             self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("results", "logout.png"))
         except Exception as err:
             logger.error("[Exception] sign_out ", exc_info=True)
             logout_result = False
             self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("results", "logout_error.png"))
-            self.close()
         finally:
             return logout_result
 

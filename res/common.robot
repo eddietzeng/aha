@@ -9,6 +9,8 @@ ${test_page}          https://www.earnaha.com/
 ${google_user}        %{GOOGLE_USERNAME}
 ${google_password}    %{GOOGLE_PASSWORD}
 ${date_to_change}     %{DATE_TO_CHANGE}
+${sign_out_result}    ${False}
+${chage_result}       ${False}
 
 *** Keywords ***
 
@@ -23,16 +25,19 @@ Validate Sign In
     Should Be True    ${sign_in_result}
 
 Sign Out Web Page
-    ${sign_out_result} =    Aha_Lib.Sign Out
+    ${sign_out_result} =    Run Keyword If    "${sign_in_result}" == "${True}"    Aha_Lib.Sign Out
     Set Global Variable    ${sign_out_result}
 
 Validate Sign Out
     Should Be True    ${sign_out_result}
 
 Chage Birthday Date
-    ${chage_result} =    Change Birthday    ${date_to_change}
+    ${chage_result} =    Run Keyword If    "${sign_in_result}" == "${True}"    Change Birthday    ${date_to_change}
     Set Global Variable    ${chage_result}
 
 Validate Change Date
     Should Be True    ${chage_result}
+
+Close Page And Browser
+    Aha_Lib.Close
 

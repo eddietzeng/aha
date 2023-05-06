@@ -77,7 +77,7 @@ pipeline {
     post {
         always {
             script{
-                sh 'cp /jenkins/resutls/* .'
+                sh 'cp /app/results/* .'
             }
             emailext (
                 subject: 'Autobot Results',
@@ -90,7 +90,7 @@ pipeline {
             // slackSend (
             //     channel: '#your-slack-channel',
             //     message: "Autobot results are available for")
-            archiveArtifacts(artifacts: "**/log.html", fingerprint: true)
+            archiveArtifacts(artifacts: "**/log.html, **/*.png", fingerprint: true)
         }
    }
 }
