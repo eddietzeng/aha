@@ -112,6 +112,9 @@ class Aha():
     def change_birthday(self, date_to_change):
         change_result = True
         try:
+            if self.page.locator("//*[@id='__next']/div[1]/div/div[1]/button").is_visible():
+                self.page.locator("//*[@id='__next']/div[1]/div/div[1]/button").click()
+
             target_date = list(map(int, date_to_change.split("/")))
             year, month, day = target_date[2], target_date[0], target_date[1]
             # edit birthday date

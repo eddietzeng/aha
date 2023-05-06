@@ -13,8 +13,9 @@ pipeline {
     stages {
         stage('Prepare Environment'){
             steps {
-                sh 'pwd'
-                sh 'mkdir -p /app/results'
+                // sh 'pwd'
+                sh 'rm -f /app/results/*'
+                // sh 'mkdir -p /app/results'
                 // sh 'ls ${BUILD_DIR}'
                 // sh(script: "mkdir -p ${BUILD_DIR} ${RESULTS_DIR}", label: "Creating results directory")
                 // sh 'cp results/date.png ${BUILD_DIR}/date.png'
@@ -26,65 +27,53 @@ pipeline {
             
         }
 
-    // stage('Check Permissions') {
-    //         steps {
-    //             script {
-    //                 // Check the permissions of BUILD_DIR
-    //                 sh "ls -ld ${BUILD_DIR}"
-
-    //                 // Check the permissions of RESULTS_DIR
-    //                 sh "ls -ld ${RESULTS_DIR}"
-    //             }
-    //         }
-    //     }
-
-    stage('Checkout') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'github-credentials', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
-                    checkout([
-                        $class: 'GitSCM',
-                        branches: [[name: '*/master']], // Replace with the branch you want to build
-                        doGenerateSubmoduleConfigurations: false,
-                        extensions: [],
-                        submoduleCfg: [],
-                        userRemoteConfigs: [[
-                            url: 'https://github.com/eddietzeng/aha.git',
-                            credentialsId: 'github-credentials' // Replace with your credentials ID
-                        ]]
-                    ])
-                }
-            }
-        }
-
-        stage('Build Docker Image') {
-            steps {
-                sh 'docker build -t autobot . --no-cache'
-            }
-        }
-
-        stage('Run Autobot') {
-            steps {
-                catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
-                    withCredentials([usernamePassword(credentialsId: 'google_oauth_credentials', usernameVariable: 'GOOGLE_USERNAME', passwordVariable: 'GOOGLE_PASSWORD')]) {
-                        sh 'docker rm -f autobot_instance'
-                        sh 'docker run --name autobot_instance -e GOOGLE_USERNAME=$GOOGLE_USERNAME -e GOOGLE_PASSWORD=$GOOGLE_PASSWORD -e DATE_TO_CHANGE=${CHANGE_DATE} -v ${RESULTS_DIR}:/app/results autobot'
+        stage('Checkout') {
+                steps {
+                    withCredentials([usernamePassword(credentialsId: 'github-credentials', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
+                        checkout([
+                            $class: 'GitSCM',
+                            branches: [[name: '*/master']], // Replace with the branch you want to build
+                            doGenerateSubmoduleConfigurations: false,
+                            extensions: [],
+                            submoduleCfg: [],
+                            userRemoteConfigs: [[
+                                url: 'https://github.com/eddietzeng/aha.git',
+                                credentialsId: 'github-credentials' // Replace with your credentials ID
+                            ]]
+                        ])
                     }
                 }
             }
-            post {
-                failure {
-                    sh 'ls /app/results'
-                    sh 'exit'
+
+        stage('Build Docker Image') {
+                steps {
+                    sh 'docker build -t autobot . --no-cache'
                 }
             }
-        }
-        stage('List') {
-            steps {
-                sh 'ls'
-                sh 'ls /app/results'
+
+        stage('Run Autobot') {
+                steps {
+                    catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+                        withCredentials([usernamePassword(credentialsId: 'google_oauth_credentials', usernameVariable: 'GOOGLE_USERNAME', passwordVariable: 'GOOGLE_PASSWORD')]) {
+                            sh 'docker rm -f autobot_instance'
+                            sh 'docker run --name autobot_instance -e GOOGLE_USERNAME=$GOOGLE_USERNAME -e GOOGLE_PASSWORD=$GOOGLE_PASSWORD -e DATE_TO_CHANGE=${CHANGE_DATE} -v ${RESULTS_DIR}:/app/results autobot'
+                        }
+                    }
+                }
+                post {
+                    failure {
+                        sh 'ls /app/results'
+                        sh 'exit'
+                    }
+                }
             }
+        stage('Test') {
+                steps {
+                    sh 'ls /app/results'
+                }
+            }
+
         }
-    }
     post {
         always {
             emailext (
@@ -93,12 +82,12 @@ pipeline {
                 attachLog: true,
                 to: env.EMAIL_RECIPIENTS,
                 mimeType: 'text/html',
-                attachmentsPattern: "**/results/*.html"
+                attachmentsPattern: "/app/results/*.html"
             )
             // slackSend (
             //     channel: '#your-slack-channel',
             //     message: "Autobot results are available for")
-            archiveArtifacts(artifacts: "**/results/*.html", fingerprint: true)
+            archiveArtifacts(artifacts: "/app/results/*.html", fingerprint: true)
         }
    }
 }
