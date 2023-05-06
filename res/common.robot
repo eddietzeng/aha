@@ -20,23 +20,19 @@ Sign In To Existing Account With Google OAuth
     Set Global Variable    ${sign_in_result}
 
 Validate Sign In
-    # Should Be True    ${sign_in_result}
-    Log To Console    ${sign_in_result}
-    Should Contain    ${sign_in_result}    PASS
+    Should Be True    ${sign_in_result}
 
 Sign Out Web Page
     ${sign_out_result} =    Aha_Lib.Sign Out
     Set Global Variable    ${sign_out_result}
 
 Validate Sign Out
-    Log To Console    ${sign_out_result}
-    Should Contain    ${sign_out_result}    PASS
+    Should Be True    ${sign_out_result}
 
 Chage Birthday Date
     ${chage_result} =    Change Birthday    ${date_to_change}
     Set Global Variable    ${chage_result}
 
 Validate Change Date
-    # Should Be True    ${chage_result}
-    Log To Console    ${chage_result}
-    Should Contain    ${chage_result}    PASS
+    Should Be True    ${chage_result}
+

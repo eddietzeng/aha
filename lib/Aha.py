@@ -1,9 +1,16 @@
 import os
 import time
+import logging
 
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 from datetime import date
+
+logging.basicConfig(
+    format="%(asctime)s %(message)s",
+    level=logging.DEBUG
+)
+logger = logging.getLogger(__name__)
 
 
 def month_converter(month):
@@ -23,6 +30,7 @@ class Aha():
         self.page = None
 
     def open_firefox_to_page(self, test_page):
+        logger.info(f"Open firefox to page: {test_page}")
         try:
             p = sync_playwright().start()
             self.browser = p.firefox.launch(headless=True)
@@ -30,7 +38,7 @@ class Aha():
             self.page.goto(test_page)
             self.page.wait_for_load_state("domcontentloaded")
         except Exception as err:
-            print(f"Failed to create browser: {err}")
+            logger.error(f"Failed to create browser: {err}")
             self.close()
 
     def close(self):
@@ -40,9 +48,10 @@ class Aha():
             self.browser.close()
 
     def sign_in_with_google_oauth(self, user, password):
-        login_result = "PASS"
+        login_result = True
         try:
             # login to google oauth
+            logger.info("Login to google oauth")
             self.page.click("text=Log In")
             self.page.click("text=Continue with Google")
             self.page.locator("input[name='identifier']").fill(user)
@@ -66,21 +75,21 @@ class Aha():
                 self.page.locator("//button[text()='Skip']").click()
 
             # check if entering main dashboard
-            if not self.page.locator("//a[@href='/sat/profile/account']").is_visible():
-                logout_result = "FAIL"
+            login_result = self.page.locator("//a[@href='/sat/profile/account']").is_visible()
             self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("results", "login.png"))
         except Exception as err:
-            print(f"err: {err}")
-            login_result = err
+            logger.error("[Exception] sign_in_with_google_oauth ", exc_info=True)
+            login_result = False
             self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("results", "login_error.png"))
             self.close()
         finally:
             return login_result
 
     def sign_out(self):
-        logout_result = "PASS"
+        logout_result = True
         try:
             # log out
+            logger.info("Log out")
             self.page.locator("//a[@href='/sat/profile/account']").nth(0).click()
             time.sleep(1)
             self.page.locator("//a[@href='/sat/profile/settings']").click()
@@ -93,19 +102,20 @@ class Aha():
             logout_result = self.page.locator("//body[@class='login-lock']").is_visible()
             self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("results", "logout.png"))
         except Exception as err:
-            print(f"err: {err}")
-            logout_result = err
+            logger.error("[Exception] sign_out ", exc_info=True)
+            logout_result = False
             self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("results", "logout_error.png"))
             self.close()
         finally:
             return logout_result
 
     def change_birthday(self, date_to_change):
-        change_result = "PASS"
+        change_result = True
         try:
             target_date = list(map(int, date_to_change.split("/")))
             year, month, day = target_date[2], target_date[0], target_date[1]
             # edit birthday date
+            logger.info("Edit birthday date")
             self.page.locator("//a[@href='/sat/profile/account']").click()
             curdate_txt = self.page.locator("//input[@name='birthday']").get_attribute("value")
             curdate = "1/1/1" if not curdate_txt else curdate_txt
@@ -133,6 +143,7 @@ class Aha():
                 time.sleep(1)
 
                 # clear hightschool graduation
+                logger.debug("Clear high school graduation")
                 self.page.locator("//input[@name='highSchool']").fill("")
                 self.page.keyboard.press("Tab")
                 self.page.keyboard.press("Backspace")
@@ -141,11 +152,11 @@ class Aha():
                     self.page.locator("//*[@id='__next']/div[1]/div/div[1]/button").click()
                 time.sleep(1)
             else:
-                print(f"Current date is already {date_to_change}. Please input another date")
+                logger.info(f"Current date is already {date_to_change}. Please input another date")
             self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("results", "date.png"))
         except Exception as err:
-            change_result = err
-            print(f"err: {err}")
+            logger.error("[Exception] change_birthday ", exc_info=True)
+            change_result = False
             self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("results", "chagedate_error.png"))
             self.close()
         finally:

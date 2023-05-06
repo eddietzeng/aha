@@ -93,12 +93,12 @@ pipeline {
                 attachLog: true,
                 to: env.EMAIL_RECIPIENTS,
                 mimeType: 'text/html',
-                attachmentsPattern: "/app/results/*.html"
+                attachmentsPattern: "**/results/*.html"
             )
             // slackSend (
             //     channel: '#your-slack-channel',
             //     message: "Autobot results are available for")
-            archiveArtifacts(artifacts: "/app/results/*.html", fingerprint: true)
+            archiveArtifacts(artifacts: "**/results/*.html", fingerprint: true)
         }
    }
 }
