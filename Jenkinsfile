@@ -14,10 +14,11 @@ pipeline {
         stage('Prepare Environment'){
             steps {
                 sh 'pwd'
-                sh 'ls /var/jenkins_home/workspace'
-                sh(script: "mkdir -p ${BUILD_DIR} ${RESULTS_DIR}", label: "Creating results directory")
                 sh 'ls ${BUILD_DIR}'
+                sh(script: "mkdir -p ${BUILD_DIR} ${RESULTS_DIR}", label: "Creating results directory")
+                sh 'cp results/date.png ${BUILD_DIR}/date.png'
                 sh 'ls'
+
             }
             
         }
