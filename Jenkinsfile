@@ -1,13 +1,8 @@
 pipeline {
     agent any
     environment {
-        EMAIL_RECIPIENTS = "eddiefree27@gmail.com"
         SLACK_CHANNEL = ""
-        CHANGE_DATE = "3/2/1990"
-        BUILD_DIR = "/var/jenkins_home/workspace"
         RESULTS_DIR = "/jenkins/results"
-        // login_user = "eddiefree27@gmail.com"
-        // login_pwd = "Ddong6lolcarousell"
     }
 
     stages {
@@ -49,12 +44,14 @@ pipeline {
                     catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
                         withCredentials([usernamePassword(credentialsId: 'google_oauth_credentials', usernameVariable: 'GOOGLE_USERNAME', passwordVariable: 'GOOGLE_PASSWORD')]) {
                             sh 'docker rm -f autobot_instance'
-                            sh 'docker run --name autobot_instance -e GOOGLE_USERNAME=$GOOGLE_USERNAME -e GOOGLE_PASSWORD=$GOOGLE_PASSWORD -e DATE_TO_CHANGE=${CHANGE_DATE} -v ${RESULTS_DIR}:/app/results autobot'
+                            sh "docker run --name autobot_instance -e GOOGLE_USERNAME=$GOOGLE_USERNAME -e GOOGLE_PASSWORD=$GOOGLE_PASSWORD -e DATE_TO_CHANGE=${params.change_date} -v ${RESULTS_DIR}:/app/results autobot"
+                            sh 'cp /app/results/* .'
                         }
                     }
                 }
                 post {
                     failure {
+                        sh 'cp /app/results/* .'
                         sh 'ls /app/results'
                         sh 'exit'
                     }
@@ -70,7 +67,7 @@ pipeline {
     post {
         always {
             script{
-                sh 'cp /app/results/* .'
+                
                 elapsed_time = currentBuild.durationString.minus(' and counting')
                 if (currentBuild.result == 'SUCCESS') {
                     color = "good"
@@ -80,19 +77,21 @@ pipeline {
                     message = "FAIL"
                 }
                 email_result = "Result: " + message + "\n" + "elpased time: " + elapsed_time
+
             }
-            echo "${email_result}"
             emailext (
                 subject: 'Autobot Results',
                 body: "${email_result}",
                 attachLog: true,
-                to: env.EMAIL_RECIPIENTS,
+                to: "${params.email_recipient}",
                 mimeType: 'text/html',
                 attachmentsPattern: "*.html, *.png"
             )
-            // slackSend (
-            //     channel: '#your-slack-channel',
-            //     message: "Autobot results are available for")
+            slackSend (
+                channel: "${params.slack_channel}",
+                color: "${color}",
+                message: "${email_result}"
+            )
             archiveArtifacts(artifacts: "*.html, *.png",  fingerprint: true)
         }
    }

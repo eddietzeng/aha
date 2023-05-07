@@ -109,6 +109,7 @@ class Aha():
             # edit birthday date
             logger.info("Edit birthday date")
             self.page.locator("//a[@href='/sat/profile/account']").click()
+            self.page.locator("//input[@name='birthday']").scroll_into_view_if_needed()
             curdate_txt = self.page.locator("//input[@name='birthday']").get_attribute("value")
             curdate = "1/1/1" if not curdate_txt else curdate_txt
             curbir = list(map(int, curdate.split("/")))
@@ -117,9 +118,13 @@ class Aha():
             if date(year, month, day) != date(bir_year, bir_month, bir_day):
                 self.page.locator("//input[@name='birthday']").click()
                 self.page.locator("//button[@title='Pick year']").click()
+                self.page.locator(f"//button[@data-year='{year}']").scroll_into_view_if_needed()
                 self.page.locator(f"//button[@data-year='{year}']").click()
+                time.sleep(1)
                 year_month_string = self.page.locator("//button[@title='Pick year']/p[1]").text_content()
                 cur_month = month_converter(year_month_string.split(" ")[0])
+                logger.info(f"cur_month: {cur_month}")
+                logger.info(f"month_to_pick: {month}")
                 while cur_month != month:
                     if cur_month > month:
                         self.page.locator("//button[@title='Previous month']").click()
@@ -130,7 +135,10 @@ class Aha():
                     year_month_string = year_month_string = self.page.locator("//button[@title='Pick year']/p[1]").text_content()
                     cur_month = month_converter(year_month_string.split(" ")[0])
                     time.sleep(1)
-                self.page.locator(f"//button[text()='{day}']").nth(0).click()
+                if day < 16:
+                    self.page.locator(f"//button[text()='{day}']").nth(0).click()
+                else:
+                    self.page.locator(f"//button[text()='{day}']").nth(-1).click()
                 self.page.locator("//button[text()='OK']").click()
                 time.sleep(1)
 
@@ -141,7 +149,7 @@ class Aha():
                 self.page.keyboard.press("Backspace")
                 self.page.locator(f"//div[text()='Save']").click()
                 self._skip_free_trial()
-                time.sleep(1)
+                time.sleep(3)
             else:
                 logger.info(f"Current date is already {date_to_change}. Please input another date")
             self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("results", "date.png"))
@@ -171,7 +179,7 @@ if __name__ == "__main__":
         "Ddong6lolcarousell"
     )
     print(f"loging: {loging_result}")
-    change_result = obj.change_birthday("11/30/1993")
+    change_result = obj.change_birthday("12/26/1990")
     print(f"change_date: {change_result}")
     logout_result = obj.sign_out()
     print(f"logout: {logout_result}")
