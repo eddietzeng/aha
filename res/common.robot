@@ -1,7 +1,7 @@
 *** Settings ***
 Documentation   Common Keyword Definition
 # Library    ../lib/test.py
-Library    ../lib/Aha2.py    WITH NAME    Aha_Lib
+Library    ../lib/Aha.py    WITH NAME    Aha_Lib
 
 *** Variables ***
 ${browser_obj}          ${EMPTY}

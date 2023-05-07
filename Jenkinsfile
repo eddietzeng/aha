@@ -42,18 +42,22 @@ pipeline {
         stage('Run Autobot') {
                 steps {
                     catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
-                        withCredentials([usernamePassword(credentialsId: 'google_oauth_credentials', usernameVariable: 'GOOGLE_USERNAME', passwordVariable: 'GOOGLE_PASSWORD')]) {
+                        withCredentials([
+                            usernamePassword(credentialsId: 'login_credentials', usernameVariable: 'EMAIL_USERNAME', passwordVariable: 'EMAIL_PASSWORD'),
+                            usernamePassword(credentialsId: 'login_credentials_by_google_oauth', usernameVariable: 'GOOGLE_USERNAME', passwordVariable: 'GOOGLE_PASSWORD')
+                        ]) {
                             sh 'docker rm -f autobot_instance'
-                            // sh "docker run --name autobot_instance -e GOOGLE_USERNAME=$GOOGLE_USERNAME -e GOOGLE_PASSWORD=$GOOGLE_PASSWORD -e DATE_TO_CHANGE=${params.change_date} -e MAILSLURP_API_KEY=${params.mailslurp_api_key}  -v ${RESULTS_DIR}:/app/results autobot"
-                            sh '''
+                            // sh "docker run --name autobot_instance -e GOOGLE_USERNAME=$GOOGLE_USERNAME -e GOOGLE_PASSWORD=$GOOGLE_PASSWORD -e DATE_TO_CHANGE=${params.change_date} -e MAILSLURP_API_KEY=${params.mailslurp_api_key} -v ${RESULTS_DIR}:/app/results autobot"
+                            sh """
                                 docker run --name autobot_instance \
                                 -e GOOGLE_USERNAME=$GOOGLE_USERNAME \
                                 -e GOOGLE_PASSWORD=$GOOGLE_PASSWORD \
+                                -e EMAIL_USERNAME=$EMAIL_USERNAME \
+                                -e EMAIL_PASSWORD=$EMAIL_PASSWORD \
                                 -e DATE_TO_CHANGE=${params.change_date} \
                                 -e MAILSLURP_API_KEY=${params.mailslurp_api_key} \
-                                -v ${RESULTS_DIR}:/app/results \
-                                autobot
-                            '''
+                                -v ${RESULTS_DIR}:/app/results autobot
+                            """
                             sh 'cp /app/results/* .'
                         }
                     }
