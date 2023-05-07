@@ -1,3 +1,4 @@
 playwright==1.32.1
 robotframework==6.0.2
 pathlib
+mailslurp-client
