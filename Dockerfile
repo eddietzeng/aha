@@ -1,7 +1,10 @@
 FROM python:3.9-slim
 
-ENV GOOGLE_USERNAME=default_username
-ENV GOOGLE_PASSWORD=default_password
+ENV GOOGLE_USERNAME=default_google_username
+ENV GOOGLE_PASSWORD=default_google_password
+ENV EMAIL_USERNAME=default_email_username
+ENV EMAIL_PASSWORD=default_username
+ENV MAILSLURP_API_KEY=default_key
 ENV DATE_TO_CHANGE=default_date
 
 # Install dependencies
