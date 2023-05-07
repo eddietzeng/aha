@@ -40,7 +40,7 @@ def create_mailslurp_inbox():
         return None
 
 
-class Aha2():
+class Aha():
     ROBOT_LIBRARY_SCOPE = "TEST SUITE"
 
     def __init__(self):
