@@ -1,5 +1,5 @@
 *** Settings ***
-Documentation   AHA Edit Prodifle Tests
+Documentation   AHA Sign Up Test
 
 Resource          ../res/common.robot
 Suite Teardown    Close Page And Browser
@@ -7,7 +7,7 @@ Suite Teardown    Close Page And Browser
 *** Variables ***
 
 *** Test Cases ***
-Test Email Sign Up
+Case 4 Test Email Sign Up
     Open Firfox To Web Page
     Sign Up With Email
     Validate Sign Up

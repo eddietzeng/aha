@@ -19,8 +19,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# ...
-
 
 def month_converter(month):
     months = ['January', 'February', 'March',
@@ -29,15 +27,6 @@ def month_converter(month):
               'November', 'December'
               ]
     return months.index(month) + 1
-
-
-def create_mailslurp_inbox():
-    try:
-        new_inbox = inbox_controller.create_inbox()
-        return new_inbox
-    except ApiException as e:
-        print("An exception occurred while creating the MailSlurp inbox: %s\n" % e)
-        return None
 
 
 class Aha():
@@ -93,7 +82,12 @@ class Aha():
     async def _sign_up_with_email_async(self, mailslurp_api_key, password):
         signup_result = True
         try:
-            inbox = mailslurp_utils.create_mailslurp_inbox(mailslurp_api_key)
+            inbox = mailslurp_utils.create_mailslurp_inbox(
+                mailslurp_api_key,
+                logger
+            )
+            if not inbox:
+                raise RuntimeError("inbox object is None")
             logger.info(f"Sign up email: {inbox.email_address}")
             # login to google oauth
             logger.info("Sign up with email")
@@ -105,7 +99,11 @@ class Aha():
             time.sleep(20)
             await self._skip_free_trial()
 
-            activation_email = mailslurp_utils.wait_for_latest_email(mailslurp_api_key, inbox)
+            activation_email = mailslurp_utils.wait_for_latest_email(
+                mailslurp_api_key,
+                inbox,
+                logger
+            )
             logger.debug(activation_email.body)
             activation_link = RE_ACTIVELINK.search(activation_email.body).group(0)
             logger.info(f"Activation link: {activation_link}")
@@ -113,7 +111,7 @@ class Aha():
             time.sleep(5)
             await self._skip_free_trial()
         except Exception as err:
-            logger.error("[Exception] sign_in_with_google_oauth ", exc_info=True)
+            logger.error("[Exception] _sign_up_with_email_async ", exc_info=True)
             signup_result = False
             await self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("results", "error_signup_with_email_error.png"))
         finally:
@@ -139,7 +137,7 @@ class Aha():
             login_result = await self.page.locator("//a[@href='/sat/profile/account']").is_visible()
             await self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("results", "login_with_email.png"))
         except Exception as err:
-            logger.error("[Exception] sign_in_with_google_oauth ", exc_info=True)
+            logger.error("[Exception] _sign_in_with_email_async ", exc_info=True)
             login_result = False
             await self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("results", "error_login_with_email.png"))
         finally:
@@ -171,7 +169,7 @@ class Aha():
             login_result = await self.page.locator("//a[@href='/sat/profile/account']").is_visible()
             await self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("results", "login.png"))
         except Exception as err:
-            logger.error("[Exception] sign_in_with_google_oauth ", exc_info=True)
+            logger.error("[Exception] _sign_in_with_google_oauth_async ", exc_info=True)
             login_result = False
             await self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("results", "login_error.png"))
         finally:
@@ -192,7 +190,7 @@ class Aha():
             time.sleep(3)
             await self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("results", "logout.png"))
         except Exception as err:
-            logger.error("[Exception] sign_out ", exc_info=True)
+            logger.error("[Exception] _sign_out_async ", exc_info=True)
             logout_result = False
             await self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("results", "logout_error.png"))
         finally:
@@ -201,7 +199,7 @@ class Aha():
     async def _change_birthday_async(self, date_to_change):
         change_result = True
         try:
-            self._skip_free_trial()
+            await self._skip_free_trial()
 
             target_date = list(map(int, date_to_change.split("/")))
             year, month, day = target_date[2], target_date[0], target_date[1]
@@ -247,13 +245,13 @@ class Aha():
                 await self.page.keyboard.press("Tab")
                 await self.page.keyboard.press("Backspace")
                 await self.page.locator(f"//div[text()='Save']").click()
-                self._skip_free_trial()
+                await self._skip_free_trial()
                 time.sleep(3)
             else:
                 logger.info(f"Current date is already {date_to_change}. Please input another date")
             await self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("results", "date.png"))
         except Exception as err:
-            logger.error("[Exception] change_birthday ", exc_info=True)
+            logger.error("[Exception] _change_birthday_async ", exc_info=True)
             change_result = False
             await self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("results", "chagedate_error.png"))
             self.close()
