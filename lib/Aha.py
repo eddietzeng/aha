@@ -65,7 +65,7 @@ class Aha():
         logger.info(f"Open firefox to page: {test_page}")
         try:
             p = await async_playwright().start()
-            self.browser = await p.firefox.launch(headless=False)
+            self.browser = await p.firefox.launch(headless=True)
             self.page = await self.browser.new_page()
             await self.page.goto(test_page)
             await self.page.wait_for_load_state("domcontentloaded")
