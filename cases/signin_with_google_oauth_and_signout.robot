@@ -9,7 +9,7 @@ Suite Teardown    Close Page And Browser
 *** Test Cases ***
 Case 1-2 Test Google OAuth Sign In
     Open Firfox To Web Page
-    Sign In To Existing Account With Email
+    Sign In To Existing Account With Google OAuth
     Validate Sign In
 
 Case 2 Test Sign Out
