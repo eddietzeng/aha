@@ -101,7 +101,7 @@ class Aha():
 
             logger.info("Click continue...")
             await self.page.locator("//button[@name='action']").click()
-            time.sleep(15)
+            time.sleep(20)
             await self._skip_free_trial()
 
             activation_email = mailslurp_utils.wait_for_latest_email(
@@ -139,7 +139,7 @@ class Aha():
             await self.page.locator("//button[@name='action']").click()
 
             # wait for loading
-            time.sleep(15)
+            time.sleep(20)
 
             await self._skip_free_trial()
 
@@ -177,7 +177,7 @@ class Aha():
             await self.page.click("//span[text()='Next' or text()='繼續' or text()='下一步']")
 
             # wait for loading
-            time.sleep(15)
+            time.sleep(20)
 
             await self._skip_free_trial()
 
@@ -228,6 +228,7 @@ class Aha():
         change_result = True
         logger.info("Edit birthday date")
         try:
+            await self._skip_free_trial()
             target_date = list(map(int, date_to_change.split("/")))
             year, month, day = target_date[2], target_date[0], target_date[1]
 
