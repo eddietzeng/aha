@@ -261,7 +261,7 @@ class Aha():
                         await self.page.locator("//button[@title='Next month']").click()
                     else:
                         break
-                    year_month_string = year_month_string = await self.page.locator("//button[@title='Pick year']/p[1]").text_content()
+                    year_month_string = await self.page.locator("//button[@title='Pick year']/p[1]").text_content()
                     cur_month = month_converter(year_month_string.split(" ")[0])
                     time.sleep(1)
                 if day < 16:
