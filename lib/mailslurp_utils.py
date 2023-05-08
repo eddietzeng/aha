@@ -19,6 +19,7 @@ def create_mailslurp_inbox(api_key, logger):
 
 
 def wait_for_latest_email(api_key, inbox, logger):
+    logger.info("Wait for latest email...")
     configuration = Configuration()
     configuration.api_key['x-api-key'] = api_key
     api_client = ApiClient(configuration)

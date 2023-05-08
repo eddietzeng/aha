@@ -15,7 +15,7 @@ RE_ACTIVELINK = re.compile(r"https:\/\/aha\.jp\.auth0\.com\/[^\s]+")
 
 logging.basicConfig(
     format="%(asctime)s %(message)s",
-    level=logging.INFO
+    level=logging.DEBUG
 )
 logger = logging.getLogger(__name__)
 
@@ -65,7 +65,7 @@ class Aha():
         logger.info(f"Open firefox to page: {test_page}")
         try:
             p = await async_playwright().start()
-            self.browser = await p.firefox.launch(headless=True)
+            self.browser = await p.firefox.launch(headless=False)
             self.page = await self.browser.new_page()
             await self.page.goto(test_page)
             await self.page.wait_for_load_state("domcontentloaded")
@@ -81,6 +81,7 @@ class Aha():
 
     async def _sign_up_with_email_async(self, mailslurp_api_key, password):
         signup_result = True
+        logger.info("Sign up with email")
         try:
             inbox = mailslurp_utils.create_mailslurp_inbox(
                 mailslurp_api_key,
@@ -89,12 +90,16 @@ class Aha():
             if not inbox:
                 raise RuntimeError("inbox object is None")
             logger.info(f"Sign up email: {inbox.email_address}")
-            # login to google oauth
-            logger.info("Sign up with email")
+
+            logger.info("Click sign up...")
             await self.page.click("text=Sign Up")
+
+            logger.info(f"Input email:{inbox.email_address} and password...")
             await self.page.locator("input[name='email']").fill(inbox.email_address)
             await self.page.locator("input[name='password']").fill(password)
             time.sleep(1)
+
+            logger.info("Click continue...")
             await self.page.locator("//button[@name='action']").click()
             time.sleep(15)
             await self._skip_free_trial()
@@ -106,6 +111,7 @@ class Aha():
             )
             logger.debug(activation_email.body)
             activation_link = RE_ACTIVELINK.search(activation_email.body).group(0)
+
             logger.info(f"Activation link: {activation_link}")
             await self.page.goto(activation_link)
             time.sleep(5)
@@ -119,13 +125,17 @@ class Aha():
 
     async def _sign_in_with_email_async(self, user, password):
         login_result = True
+        logger.info("Login with email")
         try:
-            # login to google oauth
-            logger.info("Login with email")
+            logger.info("Click Log in...")
             await self.page.click("text=Log In")
+
+            logger.info(f"Input email:{user} and password...")
             await self.page.locator("input[name='username']").fill(user)
             await self.page.locator("input[name='password']").fill(password)
             time.sleep(1)
+
+            logger.info("Click continue...")
             await self.page.locator("//button[@name='action']").click()
 
             # wait for loading
@@ -133,8 +143,10 @@ class Aha():
 
             await self._skip_free_trial()
 
-            # check if entering main dashboard
+            logger.info("Check if entering main dashboard")
             login_result = await self.page.locator("//a[@href='/sat/profile/account']").is_visible()
+            if not login_result:
+                logger.error("Fail to enter main dashboard", exc_info=True)
             await self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("results", "login_with_email.png"))
         except Exception as err:
             logger.error("[Exception] _sign_in_with_email_async ", exc_info=False)
@@ -145,11 +157,15 @@ class Aha():
 
     async def _sign_in_with_google_oauth_async(self, user, password):
         login_result = True
+        logger.info("Login with google oauth")
         try:
-            # login to google oauth
-            logger.info("Login to google oauth")
+            logger.info("Click Log in...")
             await self.page.click("text=Log In")
+
+            logger.info("Click Continue With Google...")
             await self.page.click("text=Continue with Google")
+
+            logger.info(f"Input email:{user} and password...")
             await self.page.locator("input[name='identifier']").fill(user)
             await self.page.click("//span[text()='Next' or text()='繼續' or text()='下一步']")
             time.sleep(2)
@@ -165,30 +181,41 @@ class Aha():
 
             await self._skip_free_trial()
 
-            # check if entering main dashboard
+            logger.info("Check if entering main dashboard")
             login_result = await self.page.locator("//a[@href='/sat/profile/account']").is_visible()
-            await self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("results", "login.png"))
+            if not login_result:
+                logger.error("Fail to enter main dashboard", exc_info=True)
+            await self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("results", "login_with_google_oauth.png"))
         except Exception as err:
             logger.error("[Exception] _sign_in_with_google_oauth_async ", exc_info=True)
             login_result = False
-            await self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("results", "login_error.png"))
+            await self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("results", "error_login_with_google_oauth.png"))
         finally:
             return login_result
 
     async def _sign_out_async(self):
         logout_result = True
+        logger.info("Log out")
         try:
-            # log out
-            logger.info("Log out")
+            logger.info("Click account...")
             await self.page.locator("//a[@href='/sat/profile/account']").nth(0).click()
             time.sleep(1)
+
+            logger.info("Click Settings...")
             await self.page.locator("//a[@href='/sat/profile/settings']").click()
             time.sleep(1)
+
+            logger.info("Click Log Out...")
             await self.page.locator("//button[text()='LOG OUT']").click()
             time.sleep(1)
+
+            logger.info("Click Yes...")
             await self.page.locator("//button[text()='Yes']").click()
             time.sleep(5)
-            login_result = await self.page.locator("text=Login to practice").is_visible()
+
+            logout_result = await self.page.locator("text=Login to practice").is_visible()
+            if not logout_result:
+                logger.error("Fail to log out", exc_info=True)
             await self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("results", "logout.png"))
         except Exception as err:
             logger.error("[Exception] _sign_out_async ", exc_info=True)
@@ -199,17 +226,21 @@ class Aha():
 
     async def _change_birthday_async(self, date_to_change):
         change_result = True
+        logger.info("Edit birthday date")
         try:
-            await self._skip_free_trial()
-
             target_date = list(map(int, date_to_change.split("/")))
             year, month, day = target_date[2], target_date[0], target_date[1]
-            # edit birthday date
-            logger.info("Edit birthday date")
+
+            logger.info("Click account")
             await self.page.locator("//a[@href='/sat/profile/account']").click()
+            await self._skip_free_trial()
+
+            logger.info("Scroll down till birthday text is visible")
             await self.page.locator("//input[@name='birthday']").scroll_into_view_if_needed()
             curdate_txt = await self.page.locator("//input[@name='birthday']").get_attribute("value")
             curdate = "1/1/1" if not curdate_txt else curdate_txt
+            logger.info(f"Current birthday date is {curdate_txt}")
+
             curbir = list(map(int, curdate.split("/")))
             bir_year, bir_month, bir_day = curbir[2], curbir[0], curbir[1]
 
@@ -260,26 +291,12 @@ class Aha():
             return change_result
 
     async def _skip_free_trial(self):
-        # skip free trial and tutorial pages
         if await self.page.locator("//*[@id='__next']/div[1]/div/div[1]/button").is_visible():
-            logger.info("Skip free trial")
+            logger.info("-Skip free trial")
             await self.page.locator("//*[@id='__next']/div[1]/div/div[1]/button").click()
-            time.sleep(2)
-            if await self.page.locator("//*[@id='__next']/div[1]/div/div[2]/div/button[1]").is_visible():
-                await self.page.locator("//*[@id='__next']/div[1]/div/div[2]/div/button[1]").click()
-
-
-if __name__ == "__main__":
-    api_key = os.environ.get("MAILSLURP_API_KEY")
-    obj = Aha2()
-    obj.open_firefox_to_page("https://www.earnaha.com/")
-    obj.sign_up_with_email(api_key)
-    # loging_result = obj.sign_in_with_google_oauth(
-    #     "eddiefree27@gmail.com",
-    #     "Ddong6lolcarousell"
-    # )
-    # print(f"loging: {loging_result}")
-    # change_result = obj.change_birthday("12/26/1990")
-    # print(f"change_date: {change_result}")
-    # logout_result = obj.sign_out()
-    # print(f"logout: {logout_result}")
+        elif await self.page.locator("//*[@id='__next']/div[1]/div/div[1]/div/button").is_visible():
+            logger.info("=Skip free trial")
+            await self.page.locator("//*[@id='__next']/div[1]/div/div[1]/div/button").click()
+        time.sleep(2)
+        if await self.page.locator("//*[@id='__next']/div[1]/div/div[2]/div/button[1]").is_visible():
+            await self.page.locator("//*[@id='__next']/div[1]/div/div[2]/div/button[1]").click()
