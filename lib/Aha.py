@@ -69,6 +69,7 @@ class Aha():
             self.page = await self.browser.new_page()
             await self.page.goto(test_page)
             await self.page.wait_for_load_state("domcontentloaded")
+            time.sleep(20)
         except Exception as err:
             logger.error(f"Failed to create browser: {err}")
 
