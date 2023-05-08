@@ -69,7 +69,6 @@ class Aha():
             self.page = await self.browser.new_page()
             await self.page.goto(test_page)
             await self.page.wait_for_load_state("domcontentloaded")
-            time.sleep(20)
         except Exception as err:
             logger.error(f"Failed to create browser: {err}")
 
@@ -97,7 +96,7 @@ class Aha():
             await self.page.locator("input[name='password']").fill(password)
             time.sleep(1)
             await self.page.locator("//button[@name='action']").click()
-            time.sleep(20)
+            time.sleep(15)
             await self._skip_free_trial()
 
             activation_email = mailslurp_utils.wait_for_latest_email(
@@ -130,7 +129,7 @@ class Aha():
             await self.page.locator("//button[@name='action']").click()
 
             # wait for loading
-            time.sleep(20)
+            time.sleep(15)
 
             await self._skip_free_trial()
 
@@ -138,7 +137,7 @@ class Aha():
             login_result = await self.page.locator("//a[@href='/sat/profile/account']").is_visible()
             await self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("results", "login_with_email.png"))
         except Exception as err:
-            logger.error("[Exception] _sign_in_with_email_async ", exc_info=True)
+            logger.error("[Exception] _sign_in_with_email_async ", exc_info=False)
             login_result = False
             await self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("results", "error_login_with_email.png"))
         finally:
@@ -162,7 +161,7 @@ class Aha():
             await self.page.click("//span[text()='Next' or text()='繼續' or text()='下一步']")
 
             # wait for loading
-            time.sleep(20)
+            time.sleep(15)
 
             await self._skip_free_trial()
 
@@ -188,7 +187,8 @@ class Aha():
             await self.page.locator("//button[text()='LOG OUT']").click()
             time.sleep(1)
             await self.page.locator("//button[text()='Yes']").click()
-            time.sleep(3)
+            time.sleep(5)
+            login_result = await self.page.locator("text=Login to practice").is_visible()
             await self.page.screenshot(path=Path(__file__).absolute().parent.parent.joinpath("results", "logout.png"))
         except Exception as err:
             logger.error("[Exception] _sign_out_async ", exc_info=True)
