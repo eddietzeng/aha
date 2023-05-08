@@ -296,9 +296,6 @@ class Aha():
         if await self.page.locator("//*[@id='__next']/div[1]/div/div[1]/button").is_visible():
             logger.info("-Skip free trial")
             await self.page.locator("//*[@id='__next']/div[1]/div/div[1]/button").click()
-        # elif await self.page.locator("//*[@id='__next']/div[1]/div/div[1]/div/button").is_visible():
-        #     logger.info("=Skip free trial")
-        #     await self.page.locator("//*[@id='__next']/div[1]/div/div[1]/div/button").click()
             time.sleep(2)
             if await self.page.locator("//*[@id='__next']/div[1]/div/div[2]/div/button[1]").is_visible():
                 await self.page.locator("//*[@id='__next']/div[1]/div/div[2]/div/button[1]").click()
